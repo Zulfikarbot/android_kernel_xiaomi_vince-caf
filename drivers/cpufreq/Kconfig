@@ -122,6 +122,49 @@ config CPU_FREQ_DEFAULT_GOV_INTERACTIVE
 	  loading your cpufreq low-level hardware driver, using the
 	  'interactive' governor for latency-sensitive workloads.
 
+config CPU_FREQ_DEFAULT_GOV_ALUCARD
+ 	bool "alucard"
+	select CPU_FREQ_GOV_ALUCARD
+
+config CPU_FREQ_DEFAULT_GOV_THENEWBEGINNING
+ 	bool "thenewbeginning"
+	select CPU_FREQ_GOV_THENEWBEGINNING
+
+config CPU_FREQ_DEFAULT_GOV_DANCEDANCE
+	bool "dancedance"
+	select CPU_FREQ_GOV_DANCEDANCE
+	help
+
+config CPU_FREQ_DEFAULT_GOV_DARKNESS
+        bool "darkness"
+        select CPU_FREQ_GOV_DARKNESS
+        help
+
+config CPU_FREQ_DEFAULT_GOV_DARKNESSV5
+        bool "darknessv5"
+        select CPU_FREQ_GOV_DARKNESSV5
+        help
+
+config CPU_FREQ_DEFAULT_GOV_CULTIVATION
+	bool "cultivation"
+	select CPU_FREQ_GOV_CULTIVATION
+	help
+		Use the CPUFreq governor 'cultivation' as default.
+
+config CPU_FREQ_DEFAULT_GOV_LIONFISH
+	bool "lionfish"
+	select CPU_FREQ_GOV_LIONFISH
+	help
+	  Use the CPUFreq governor 'lionfish' as default.
+
+config CPU_FREQ_DEFAULT_GOV_LISI
+	bool "lisi"
+	select CPU_FREQ_GOV_LISI
+	help
+	  Use the CPUFreq governor 'lisi' as default. This allows
+	  you to get a full dynamic cpu frequency and latency-sensitive
+	  loads
+
 config CPU_FREQ_DEFAULT_GOV_SCHED
 	bool "sched"
 	select CPU_FREQ_GOV_INTERACTIVE
@@ -197,6 +240,70 @@ config CPU_FREQ_GOV_INTERACTIVE
 	  interactive workloads.
 
 	  For details, take a look at linux/Documentation/cpu-freq.
+
+	  If in doubt, say N.
+
+config CPU_FREQ_GOV_ALUCARD
+        tristate "'alucard' cpufreq governor"
+	depends on CPU_FREQ
+
+config CPU_FREQ_GOV_DANCEDANCE
+	tristate "'dancedance' cpufreq governor"
+	depends on CPU_FREQ
+	default y
+
+config CPU_FREQ_GOV_LISI
+	bool "'lisi' cpufreq policy governor"
+	help
+	  'lisi' - This driver adds a dynamic cpufreq policy governor
+	  designed for latency-sensitive workloads.
+
+	  The governor does a periodic polling and
+	  changes frequency based on the CPU utilization.
+
+	  If in doubt, say N.
+
+config CPU_FREQ_GOV_DARKNESS
+	tristate "'darkness' cpufreq governor"
+        depends on CPU_FREQ
+
+config CPU_FREQ_GOV_DARKNESSV5
+	tristate "'darknessv5' cpufreq governor"
+        depends on CPU_FREQ
+
+config CPU_FREQ_GOV_CULTIVATION
+	tristate "'cultivation' cpufreq governor"
+	depends on CPU_FREQ
+	default y
+	help
+	  'cultivation' - another tuned interactive with extra options
+
+config CPU_FREQ_GOV_IMPULSE
+	tristate "'impulse' cpufreq policy governor"
+	help
+	  'impulse' - This driver adds a dynamic cpufreq policy governor
+	  designed for latency-sensitive workloads.
+
+config CPU_FREQ_GOV_LIONFISH
+	tristate "'lionfish' governor"
+	depends on CPU_FREQ
+	default y
+	help
+	  'lionfish' - this is an improved version of the conservative governor
+	  that is optimized for smartphones. To avoid lag, it quickly jumps
+	  to an intermediate frequency when high load is encountered at low
+	  frequencies. If very high load is encountered above this intermediate
+	  frequency, it jumps to a high frequency. For moderate loads, it
+	  votes to increase, decrease, or maintain frequencies at each sampling
+	  interval. When enough votes are gathered to raise or lower the
+	  frequency, the frequency is changed. This mechanism reduces jitter
+	  compared to the conservative governor. Lionfish uses proportional
+	  ramping to more quickly reach suitable frequencies compared to the
+	  conservative governor. By default, Lionfish also reduces frequencies
+	  more aggressively than the conservative governor when loads are reduced.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called cpufreq_lionfish.
 
 	  If in doubt, say N.
 
