@@ -1,6 +1,7 @@
 /* Request a key from userspace
  *
  * Copyright (C) 2004-2007 Red Hat, Inc. All Rights Reserved.
+ * Copyright (C) 2018 XiaoMi, Inc.
  * Written by David Howells (dhowells@redhat.com)
  *
  * This program is free software; you can redistribute it and/or
@@ -328,6 +329,7 @@ static int construct_get_dest_keyring(struct key **_dest_keyring)
 		 * that /sbin/request-key can itself use request_key() to add
 		 * keys to the original requestor's destination keyring.
 		 */
+
 		if (dest_keyring && do_perm_check) {
 			ret = key_permission(make_key_ref(dest_keyring, 1),
 					     KEY_NEED_WRITE);
@@ -474,7 +476,6 @@ static struct key *construct_key_and_link(struct keyring_search_context *ctx,
 		ret = -ENOMEM;
 		goto error_put_dest_keyring;
 	}
-
 	ret = construct_alloc_key(ctx, dest_keyring, flags, user, &key);
 	key_user_put(user);
 
