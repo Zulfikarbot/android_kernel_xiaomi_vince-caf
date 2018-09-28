@@ -5,6 +5,7 @@
  *
  * Copyright (C) 2012 Alexandra Chin <alexandra.chin@tw.synaptics.com>
  * Copyright (C) 2012 Scott Lin <scott.lin@tw.synaptics.com>
+ * Copyright (C) 2018 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,13 +35,13 @@
 #ifndef _SYNAPTICS_DSX_H_
 #define _SYNAPTICS_DSX_H_
 
-#define PLATFORM_DRIVER_NAME "synaptics_dsx_v21"
-#define STYLUS_DRIVER_NAME "synaptics_dsx_stylus"
+#define PLATFORM_DRIVER_NAME "lansi_dsx_v21"
+#define STYLUS_DRIVER_NAME "synaptics_dsx_stylus_lansi"
 #define ACTIVE_PEN_DRIVER_NAME "synaptics_dsx_active_pen"
 #define PROXIMITY_DRIVER_NAME "synaptics_dsx_proximity"
 #define GESTURE_DRIVER_NAME "synaptics_dsx_gesture"
-#define I2C_DRIVER_NAME "synaptics_dsx_i2c"
-#define SPI_DRIVER_NAME "synaptics_dsx_spi"
+#define I2C_DRIVER_NAME "lansi_dsx_i2c"
+#define SPI_DRIVER_NAME "lansi_dsx_spi"
 
 /*
  * struct synaptics_dsx_button_map - button map
