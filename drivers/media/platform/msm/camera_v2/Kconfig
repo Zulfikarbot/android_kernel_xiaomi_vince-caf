@@ -268,3 +268,8 @@ config MSM_SEC_CCI_DEBUG
 	---help---
 	  Enables simulation of secure camera for Secure CCI Realy
 	  debugging.
+
+config FLASHLIGHT_VINCE_O
+	bool "XIAOMI E7 use"
+	---help---
+	enable flashlight changes for E7 project.
