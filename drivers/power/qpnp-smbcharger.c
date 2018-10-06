@@ -473,6 +473,7 @@ module_param_named(
 	int, S_IRUSR | S_IWUSR
 );
 
+static int hvdcp_type;
 #define WIPOWER_DEFAULT_HYSTERISIS_UV	250000
 static int wipower_dcin_hyst_uv = WIPOWER_DEFAULT_HYSTERISIS_UV;
 module_param_named(
@@ -3072,7 +3073,11 @@ static int smbchg_system_temp_level_set(struct smbchg_chip *chip,
 	int rc = 0;
 	int prev_therm_lvl;
 	int thermal_icl_ma;
-
+#if defined(CONFIG_PROJECT_VINCE) && defined(GLOBAL_THERMAL)
+	unsigned int	hvdcp_thermal_mitigation[7] = {2500, 2500, 1500, 1000, 1000, 500, 0};
+#elif defined(CONFIG_PROJECT_VINCE)
+	unsigned int	hvdcp_thermal_mitigation[7] = {2500, 2500, 2500, 1000, 1000, 500, 0};
+#endif
 	if (!chip->thermal_mitigation) {
 		dev_err(chip->dev, "Thermal mitigation not supported\n");
 		return -EINVAL;
@@ -3126,8 +3131,18 @@ static int smbchg_system_temp_level_set(struct smbchg_chip *chip,
 			pr_err("Couldn't disable DC thermal ICL vote rc=%d\n",
 				rc);
 	} else {
+#if defined(CONFIG_PROJECT_VINCE)
+		if (hvdcp_type == POWER_SUPPLY_TYPE_USB_HVDCP || hvdcp_type == POWER_SUPPLY_TYPE_USB_HVDCP_3) {
+		thermal_icl_ma =
+			(int)hvdcp_thermal_mitigation[chip->therm_lvl_sel];
+		} else{
 		thermal_icl_ma =
 			(int)chip->thermal_mitigation[chip->therm_lvl_sel];
+		}
+#else
+		thermal_icl_ma =
+			(int)chip->thermal_mitigation[chip->therm_lvl_sel];
+#endif
 		rc = vote(chip->usb_icl_votable, THERMAL_ICL_VOTER, true,
 					thermal_icl_ma);
 		if (rc < 0)
@@ -4726,6 +4741,7 @@ static int smbchg_change_usb_supply_type(struct smbchg_chip *chip,
 	 * modes, skip all BC 1.2 current if external typec is supported.
 	 * Note: for SDP supporting current based on USB notifications.
 	 */
+	hvdcp_type = type;
 	if (chip->typec_psy && (type != POWER_SUPPLY_TYPE_USB))
 		current_limit_ma = chip->typec_current_ma;
 	else if (type == POWER_SUPPLY_TYPE_USB)
@@ -4741,6 +4757,7 @@ static int smbchg_change_usb_supply_type(struct smbchg_chip *chip,
 	else
 		current_limit_ma = smbchg_default_dcp_icl_ma;
 	hvdcp_flag = type;
+
 	pr_smb(PR_STATUS, "Type %d: setting mA = %d\n",
 		type, current_limit_ma);
 	rc = vote(chip->usb_icl_votable, PSY_ICL_VOTER, true,
@@ -7842,7 +7859,11 @@ err:
 }
 
 #define DEFAULT_VLED_MAX_UV		3500000
+#ifdef CONFIG_PROJECT_VINCE
+#define DEFAULT_FCC_MA			2500
+#else
 #define DEFAULT_FCC_MA			2000
+#endif
 static int smb_parse_dt(struct smbchg_chip *chip)
 {
 	int rc = 0, ocp_thresh = -EINVAL;
@@ -8681,8 +8702,12 @@ static int smbchg_probe(struct spmi_device *spmi)
 		goto votables_cleanup;
 	}
 
+	#ifdef CONFIG_PROJECT_VINCE
+	chip->hvdcp_not_supported = false;
+	#else
 	printk("[SMBCHG]hvdcp disable\n");
 	chip->hvdcp_not_supported = true;
+	#endif
 
 	rc = smbchg_check_chg_version(chip);
 	if (rc) {
