@@ -1,0 +1,131 @@
+/*
+ * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&soc {
+	tsens: tsens@4a8000 {
+		/delete-property/ qcom,client-id;
+		/delete-property/ qcom,sensor-id;
+		qcom,sensors = <16>;
+		qcom,slope = <3200 3200 3200 3200 3200 3200 3200 3200 3200
+					3200 3200 3200 3200 3200 3200 3200>;
+	};
+	qcom,msm-core@a0000 {
+		qcom,low-hyst-temp = <10>;
+		qcom,high-hyst-temp = <5>;
+	};
+
+	/delete-node/ uart@7aef000;
+
+	spi_6: spi@7af6000 { /* BLSP2 QUP2 */
+		compatible = "qcom,spi-qup-v2";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "spi_physical", "spi_bam_physical";
+		reg = <0x7af6000 0x600>,
+			<0x7ac4000 0x1f000>;
+		interrupt-names = "spi_irq", "spi_bam_irq";
+		interrupts = <0 300 0>, <0 239 0>;
+		spi-max-frequency = <50000000>;
+		pinctrl-names = "spi_default", "spi_sleep";
+		pinctrl-0 = <&spi6_default &spi6_cs0_active>;
+		pinctrl-1 = <&spi6_sleep &spi6_cs0_sleep>;
+		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
+			<&clock_gcc clk_gcc_blsp2_qup2_spi_apps_clk>;
+		clock-names = "iface_clk", "core_clk";
+		qcom,infinite-mode = <0>;
+		qcom,use-bam;
+		qcom,use-pinctrl;
+		qcom,ver-reg-exists;
+		qcom,bam-consumer-pipe-index = <6>;
+		qcom,bam-producer-pipe-index = <7>;
+		qcom,master-id = <84>;
+	};
+
+	clock_gcc: qcom,gcc@1800000 {
+		reg = <0x1800000 0x80000>;
+		reg-names = "cc_base";
+	};
+
+	qcom,msm-imem@8600000 {
+		/delete-node/ dload_type@1c;
+		dload_type@18 {
+			compatible = "qcom,msm-imem-dload-type";
+			reg = <0x18 4>;
+		};
+	};
+
+	sn_fuse: snfuse@0xa4128 {
+		compatible = "qcom,sn-fuse";
+		reg = <0xa4128 0x4>;
+		reg-names = "sn-base";
+	};
+
+	/delete-node/ qseecom@85b00000;
+
+	sdhc_1: sdhci@7824900 {
+		reg = <0x7824900 0x500>, <0x7824000 0x800>, <0x7824e00 0x200>;
+		reg-names = "hc_mem", "core_mem", "cmdq_mem";
+	};
+
+	usb3: ssusb@7000000{
+		vbus_dwc3-supply = <&smbcharger_charger_otg>;
+		qcom,msm-bus,num-cases = <2>;
+		qcom,detect-dpdm-floating;
+		qcom,msm-bus,vectors-KBps =
+					<61 512 0 0>,
+					<61 512 240000 800000>;
+	};
+
+	qusb_phy: qusb@79000 {
+		reg = <0x079000 0x180>,
+			<0x070f8800 0x400>,
+			<0x01841030 0x4>,
+			<0x0193f044 0x4>,
+			<0x0193f020 0x4>;
+		reg-names = "qusb_phy_base",
+			"qscratch_base",
+			"ref_clk_addr",
+			"tcsr_phy_clk_scheme_sel",
+			"tcsr_phy_level_shift_keeper";
+		qcom,qusb-phy-init-seq = <0xF8 0x80
+					0x53 0x84
+					0x93 0x88
+					0xCf 0x8C
+					0x14 0x9C
+					0x30 0x08
+					0x79 0x0C
+					0x21 0x10
+					0x00 0x90
+					0x9F 0x1C
+					0x00 0x18>;
+	};
+
+	ssphy: ssphy@78000 {
+		/delete-property/ core-supply;
+		vdda18-supply = <&pm8953_l7>;
+	};
+
+	usb_audio_qmi_dev {
+		compatible = "qcom,usb-audio-qmi-dev";
+		qcom,usb-audio-intr-num = <2>;
+	};
+
+};
+
+#include "msm8953-panels-vince.dtsi"
+#include "msm8953-audio-vince.dtsi"
+#include "msm8953-qrd-vince.dtsi"
+#include "msm8953-general-vince.dtsi"
+#include "msm8953-camera-sensor-qrd-vince.dtsi"
+#include "msm8953-pinctrl-vince.dtsi"
+#include "msm8953-memory-vince.dtsi"
