@@ -11,7 +11,7 @@ extern "C" {
 #include <linux/gpio_keys.h>
 #include <linux/proc_fs.h>
 #include <linux/of_gpio.h>
-#include <asm/gpio.h>
+#include <asm-generic/gpio.h>
 #include <linux/input.h>
 #define VITURALSAR_I2C_DRIVER_NAME		"virtualsar"
 #define VIRTUAL_I2C_DEVICETREE_NAME			"virtualsar,sar"
