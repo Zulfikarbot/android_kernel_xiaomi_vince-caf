@@ -11,72 +11,68 @@
 #include <linux/types.h>
 #include <net/sock.h>
 #include <net/netlink.h>
+
 #include "gf_spi.h"
 
-#define NETLINK_TEST 25
-#define MAX_MSGSIZE 32
+#define MAX_MSG_SIZE 32
 
 static int pid = -1;
-static struct sock *nl_sk;
+struct sock *nl_sk = NULL;
 
-int sendnlmsg(char *msg)
+void sendnlmsg(char *message)
 {
-	struct sk_buff *skb;
+	struct sk_buff *skb_1;
 	struct nlmsghdr *nlh;
-	int len = NLMSG_SPACE(MAX_MSGSIZE);
+	int len = NLMSG_SPACE(MAX_MSG_SIZE);
 	int ret = 0;
+	int slen;
 
-	if (!msg || !nl_sk || !pid)
-		return -ENODEV;
+	if (!message || !nl_sk || !pid)
+		return;
 
-	skb = alloc_skb(len, GFP_ATOMIC);
-	if (!skb)
-		return -ENOMEM;
-
-	nlh = nlmsg_put(skb, 0, 0, 0, MAX_MSGSIZE, 0);
-	if (!nlh) {
-		kfree_skb(skb);
-		return -EMSGSIZE;
+	skb_1 = alloc_skb(len, GFP_KERNEL);
+	if (!skb_1) {
+		pr_err("%s: failed to allocate network buffer\n", __func__);
+		return;
 	}
 
-	NETLINK_CB(skb).portid = 0;
-	NETLINK_CB(skb).dst_group = 0;
+	nlh = nlmsg_put(skb_1, 0, 0, 0, MAX_MSG_SIZE, 0);
 
-	memcpy(NLMSG_DATA(nlh), msg, sizeof(char));
-	pr_debug("send message: %d\n", *(char *)NLMSG_DATA(nlh));
+	NETLINK_CB(skb_1).portid = 0;
+	NETLINK_CB(skb_1).dst_group = 0;
 
-	ret = netlink_unicast(nl_sk, skb, pid, MSG_DONTWAIT);
-	if (ret > 0)
-		ret = 0;
+	slen = strlen(message);
+	message[slen] = '\0';
+	memcpy(NLMSG_DATA(nlh), message, slen + 1);
 
-	return ret;
+	ret = netlink_unicast(nl_sk, skb_1, pid, MSG_DONTWAIT);
+	if (!ret)
+		pr_err("%s: failed to send netlink message\n", __func__);
 }
 
-static void nl_data_ready(struct sk_buff *__skb)
+void nl_data_ready(struct sk_buff *__skb)
 {
 	struct sk_buff *skb;
 	struct nlmsghdr *nlh;
 	char str[100];
 
-	skb = skb_get(__skb);
-	if (skb->len >= NLMSG_SPACE(0)) {
-		nlh = nlmsg_hdr(skb);
+	skb = skb_get (__skb);
 
-		memcpy(str, NLMSG_DATA(nlh), sizeof(str));
-		pid = nlh->nlmsg_pid;
+	if (skb->len < NLMSG_SPACE(0))
+		return;
 
-		kfree_skb(skb);
-	}
+	nlh = nlmsg_hdr(skb);
+	memcpy(str, NLMSG_DATA(nlh), sizeof(str));
+	pid = nlh->nlmsg_pid;
 
+	kfree_skb(skb);
 }
 
-
-int netlink_init(void)
+void netlink_init(void)
 {
 	struct netlink_kernel_cfg netlink_cfg;
 
 	memset(&netlink_cfg, 0, sizeof(struct netlink_kernel_cfg));
-
 	netlink_cfg.groups = 0;
 	netlink_cfg.flags = 0;
 	netlink_cfg.input = nl_data_ready;
@@ -84,21 +80,16 @@ int netlink_init(void)
 
 	nl_sk = netlink_kernel_create(&init_net, NETLINK_TEST,
 			&netlink_cfg);
-
-	if (!nl_sk) {
-		pr_err("create netlink socket error\n");
-		return 1;
-	}
-
-	return 0;
+	if (!nl_sk)
+		pr_err("%s: failed to create netlink socket\n", __func__);
 }
 
 void netlink_exit(void)
 {
-	if (nl_sk != NULL) {
-		netlink_kernel_release(nl_sk);
-		nl_sk = NULL;
-	}
+	if (!nl_sk)
+		return;
 
-	pr_info("self module exited\n");
+	netlink_kernel_release(nl_sk);
+	nl_sk = NULL;
 }
+
