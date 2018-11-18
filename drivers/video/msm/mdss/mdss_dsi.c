@@ -2999,13 +2999,6 @@ static struct device_node *mdss_dsi_pref_prim_panel(
  * returns pointer to panel node on success, NULL on error.
  */
 char panel_name[MDSS_MAX_PANEL_LEN] = "";
-#ifdef CONFIG_WPONIT_ADJUST_FUN
-u32 white_point_num_x = 0;
-u32 white_point_num_y = 0;
-u32 white_point_num_r = 0;
-u32 white_point_num_g = 0;
-u32 white_point_num_b = 0;
-#endif
 #ifdef CONFIG_PROJECT_VINCE
 int white_point_num = 0;
 extern uint32_t ESD_interval;		/*ESD check period*/
@@ -3016,15 +3009,9 @@ static struct device_node *mdss_dsi_find_panel_of_node(
 	int len, i = 0;
 	int ctrl_id = pdev->id - 1;
 
-#ifdef CONFIG_PROJECT_VINCE
-	char *wponit_str;
-#endif
 	char ctrl_id_stream[3] =  "0:";
 	char *str1 = NULL, *str2 = NULL, *override_cfg = NULL;
 	char cfg_np_name[MDSS_MAX_PANEL_LEN] = "";
-#ifdef CONFIG_WPONIT_ADJUST_FUN
-	char *wponit_str;
-#endif
 	struct device_node *dsi_pan_node = NULL, *mdss_node = NULL;
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = platform_get_drvdata(pdev);
 	struct mdss_panel_info *pinfo = &ctrl_pdata->panel_data.panel_info;
@@ -3044,29 +3031,6 @@ static struct device_node *mdss_dsi_find_panel_of_node(
 		lcm_ffbm_mode = strnstr(panel_cfg, "ffbm", len);
 		if (lcm_ffbm_mode) {
 			pr_info("[ffbm] we are in ffbm mode now!\n");
-		}
-#endif
-
-#ifdef CONFIG_PROJECT_VINCE
-		wponit_str = strnstr(panel_cfg, ":wpoint=", len);
-		if (!wponit_str) {
-			pr_err("%s:[white point calibration] white point is not present in %s\n",
-					__func__, panel_cfg);
-		} else{
-			white_point_num = ((*(wponit_str +  8)) - '0') * 10 + ((*(wponit_str +  9) - '0'));
-			pr_err("[white point calibration] white_point_num = %d\n", white_point_num);
-		}
-#endif
-
-#ifdef CONFIG_WPONIT_ADJUST_FUN
-		wponit_str = strnstr(panel_cfg, ":wpoint=", len);
-		if (!wponit_str) {
-			pr_err("%s:[white point calibration] white point is not present in %s\n",
-					__func__, panel_cfg);
-		} else{
-			white_point_num_x = ((*(wponit_str +  8)) - '0') * 100 + ((*(wponit_str +  9) - '0'))*10 +(*(wponit_str +  10) - '0');
-			white_point_num_y = ((*(wponit_str +  11)) - '0') * 100 + ((*(wponit_str +  12) - '0'))*10 +(*(wponit_str +  13) - '0');
-			pr_err("[white point calibration] white_point_num_x = %d,white_point_num_y = %d\n", white_point_num_x,white_point_num_y);
 		}
 #endif
 
@@ -3136,18 +3100,8 @@ static struct device_node *mdss_dsi_find_panel_of_node(
 			hq_regiser_hw_info(HWID_LCM,"oncell,vendor:Skh,IC:atm007");
 		} else if (!strcmp(panel_name, "qcom,mdss_dsi_ili7807_fhdplus_video")) {
 			hq_regiser_hw_info(HWID_LCM,"oncell,vendor:bird,IC:lol898");
-#ifdef CONFIG_WPONIT_ADJUST_FUN
-			white_point_num_r = 653332;
-			white_point_num_g = 291664;
-			white_point_num_b = 154054;
-#endif
 		} else if (!strcmp(panel_name, "qcom,mdss_dsi_hx8399c_fhdplus_video")) {
 			hq_regiser_hw_info(HWID_LCM,"oncell,vendor:csot,IC:hx8399c");
-#ifdef CONFIG_WPONIT_ADJUST_FUN
-			white_point_num_r = 656333;
-			white_point_num_g = 288654;
-			white_point_num_b = 146057;
-#endif
 		}
 
 		mdss_node = of_parse_phandle(pdev->dev.of_node,

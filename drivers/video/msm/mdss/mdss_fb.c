@@ -2,7 +2,7 @@
  * Core MDSS framebuffer driver.
  *
  * Copyright (C) 2007 Google Incorporated
- * Copyright (c) 2008-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2008-2018, The Linux Foundation. All rights reserved.
  * Copyright (C) 2018 XiaoMi, Inc.
  *
  * This software is licensed under the terms of the GNU General Public
@@ -69,14 +69,6 @@ extern int LCM_effect[4];
 extern int LCM_effect[3];
 #endif
 
-
-#if defined(CONFIG_WPONIT_ADJUST_FUN)
-extern uint32_t white_point_num_x;
-extern uint32_t white_point_num_y;
-extern uint32_t white_point_num_r;
-extern uint32_t white_point_num_g;
-extern uint32_t white_point_num_b;
-#endif
 
 #ifdef CONFIG_FB_MSM_TRIPLE_BUFFER
 #define MDSS_FB_NUM 3
@@ -929,72 +921,6 @@ static ssize_t mdss_fb_get_dispparam(struct device *dev,
 	return ret;
 }
 
-#if defined(CONFIG_WPONIT_ADJUST_FUN)
-bool set_white_point_x = true;
-static ssize_t mdss_fb_set_wpoint(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t len)
-{
-	if (set_white_point_x) {
-		sscanf(buf, "%3d", &white_point_num_x) ;
-		set_white_point_x = false;
-	} else {
-		sscanf(buf, "%3d", &white_point_num_y) ;
-		set_white_point_x = true;
-	}
-		return len;
-}
-static ssize_t mdss_fb_get_wpoint(struct device *dev,
-		struct device_attribute *attr, char *buf)
-{
-	int ret;
-	ret = scnprintf(buf, PAGE_SIZE, "%3d%3d\n",
-		white_point_num_x, white_point_num_y);
-	return ret;
-}
-static ssize_t mdss_fb_set_rpoint(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t len)
-{
-	sscanf(buf, "%6d", &white_point_num_r) ;
-		return len;
-}
-static ssize_t mdss_fb_get_rpoint(struct device *dev,
-		struct device_attribute *attr, char *buf)
-{
-	int ret;
-	ret = scnprintf(buf, PAGE_SIZE, "%6d\n",
-		white_point_num_r);
-	return ret;
-}
-static ssize_t mdss_fb_set_gpoint(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t len)
-{
-	sscanf(buf, "%6d", &white_point_num_g) ;
-		return len;
-}
-static ssize_t mdss_fb_get_gpoint(struct device *dev,
-		struct device_attribute *attr, char *buf)
-{
-	int ret;
-	ret = scnprintf(buf, PAGE_SIZE, "%6d\n",
-		white_point_num_g);
-	return ret;
-}
-static ssize_t mdss_fb_set_bpoint(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t len)
-{
-	sscanf(buf, "%6d", &white_point_num_b) ;
-		return len;
-}
-static ssize_t mdss_fb_get_bpoint(struct device *dev,
-		struct device_attribute *attr, char *buf)
-{
-	int ret;
-	ret = scnprintf(buf, PAGE_SIZE, "%6d\n",
-		white_point_num_b);
-	return ret;
-}
-#endif
-
 static ssize_t mdss_fb_change_dfps_mode(struct device *dev,
 	struct device_attribute *attr, const char *buf, size_t len)
 {
@@ -1151,16 +1077,6 @@ static DEVICE_ATTR(msm_fb_persist_mode, S_IRUGO | S_IWUSR,
 	mdss_fb_get_persist_mode, mdss_fb_change_persist_mode);
 static DEVICE_ATTR(msm_fb_dispparam, S_IRUGO | S_IWUSR,
 	mdss_fb_get_dispparam, mdss_fb_change_dispparam);
-#if defined(CONFIG_WPONIT_ADJUST_FUN)
-static DEVICE_ATTR(msm_fb_wpoint, S_IRUGO | S_IWUSR,
-	mdss_fb_get_wpoint, mdss_fb_set_wpoint);
-static DEVICE_ATTR(msm_fb_rpoint, S_IRUGO | S_IWUSR,
-	mdss_fb_get_rpoint, mdss_fb_set_rpoint);
-static DEVICE_ATTR(msm_fb_gpoint, S_IRUGO | S_IWUSR,
-	mdss_fb_get_gpoint, mdss_fb_set_gpoint);
-static DEVICE_ATTR(msm_fb_bpoint, S_IRUGO | S_IWUSR,
-	mdss_fb_get_bpoint, mdss_fb_set_bpoint);
-#endif
 static struct attribute *mdss_fb_attrs[] = {
 	&dev_attr_msm_fb_type.attr,
 	&dev_attr_msm_fb_split.attr,
@@ -1175,12 +1091,6 @@ static struct attribute *mdss_fb_attrs[] = {
 	&dev_attr_measured_fps.attr,
 	&dev_attr_msm_fb_persist_mode.attr,
 	&dev_attr_msm_fb_dispparam.attr,
-#if defined(CONFIG_WPONIT_ADJUST_FUN)
-	&dev_attr_msm_fb_wpoint.attr,
-	&dev_attr_msm_fb_rpoint.attr,
-	&dev_attr_msm_fb_gpoint.attr,
-	&dev_attr_msm_fb_bpoint.attr,
-#endif
 	NULL,
 };
 
@@ -5220,7 +5130,6 @@ static int mdss_fb_ioctl(struct fb_info *info, unsigned int cmd,
 {
 	if (!info || !info->par)
 		return -EINVAL;
-
 
 	return mdss_fb_do_ioctl(info, cmd, arg, file);
 }
