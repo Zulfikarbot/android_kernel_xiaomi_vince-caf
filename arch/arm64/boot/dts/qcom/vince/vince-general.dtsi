@@ -66,6 +66,11 @@ firmware: firmware {
 			qcom,en-cabc;
 		};
 
+		pmi_haptic: qcom,haptics@c000 {
+			qcom,actuator-type = <1>;
+			qcom,use-play-irq;
+			qcom,use-sc-irq;
+		};
 		labibb: qpnp-labibb-regulator {
 			status = "ok";
 			ibb_regulator: qcom,ibb@dc00 {
